@@ -32,5 +32,11 @@ def ejemplos():
     #imprimir_pokemon()
     pokemon=obtener_pokemon()
     print(pokemon['name'])
-    imagen=obtener_imagen_pokemon(pokemon)
-    print(imagen)
+    imagen_url=obtener_imagen_pokemon(pokemon)
+    response = requests.get(imagen_url)
+    with open('pr.png', 'wb') as handler:
+        handler.write(response.content)
+   
+
+
+ejemplos()
