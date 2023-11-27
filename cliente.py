@@ -65,7 +65,7 @@ while True:
         respuesta = input()
         if respuesta == "Sí":
             print("Cliente: Enviando mensaje al servidor con codigo 10: Solicitar al servidor un pokemon")
-            sock.send(str(msg30).encode())
+            sock.send(str(msg10).encode())
         else:
             print("Cliente: Enviando mensaje al servidor con codigo 32: Terminando sesión")
             sock.send(str(msg32).encode())
