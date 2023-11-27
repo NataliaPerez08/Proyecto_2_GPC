@@ -55,7 +55,7 @@ def threaded(conn, addr):
             if codigo == 32:
                 print("Servidor: Recibí solicitud de terminar sesión")
                 conn.send(str(msg32).encode())
-                print_lock.release()
+                #print_lock.release()
                 break
         else:
             print_lock.release()
@@ -76,7 +76,7 @@ def Main():
         # Acepta una conexión
         conn, addr = sock.accept()
         # Lock adquirido por el cliente
-        print_lock.acquire()
+        #print_lock.acquire()
         print('Connected to :', addr[0], ':', addr[1])
         start_new_thread(threaded, (conn,addr))
         #sock.close()
