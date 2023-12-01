@@ -12,12 +12,17 @@ def threaded(conn, addr):
     msg32 = {"codigo":32,"msg":"Terminando sesión"}
 
     pokemon_actual = ""
+    lista_pokemones = []
     while True:
         # Recibe un mensaje del cliente
         data = conn.recv(1024)
-        if data:  
-            msg_cliente = eval(data.decode())
-            codigo = msg_cliente['codigo']
+        if data: 
+            try:
+                msg_cliente = eval(data.decode())
+                codigo = msg_cliente['codigo']
+            except SyntaxError:
+                print("Servidor: Recibí mensaje inválido del cliente",addr[0],':',addr[1])
+                print(data.decode())
 
             if codigo == 10:
                 print("Servidor: Recibí solicitud de pokemon")
@@ -28,11 +33,12 @@ def threaded(conn, addr):
 
             if codigo == 30:
                 print("Servidor: Recibí respuesta afirmativa de captura de pokemon del cliente",addr[0],':',addr[1])
-                capturado = random.randint(0,1)
+                capturado = random.randint(0,5)
 
                 if capturado == 1:
                     print("Servidor: Pokemon capturado del cliente",addr[0],':',addr[1])
                     msg22 = {"codigo":22,"msg":"Pokemon capturado","pokemon":pokemon_actual}
+                    lista_pokemones.append(pokemon_actual)
                     conn.send(str(msg22).encode())
                 else:
                     print("Servidor: Pokemon no capturado del cliente",addr[0],':',addr[1])
@@ -43,6 +49,10 @@ def threaded(conn, addr):
                     if intentos == 0:
                         print("Servidor: Intentos de captura agotados")
                         conn.send(str(msg23).encode())
+            if codigo == 24:
+                print("Servidor: Recibí solicitud de pokemones capturados del cliente",addr[0],':',addr[1])
+                msg25 = {"codigo":25,"msg":"Pokemones capturados","pokemones":lista_pokemones}
+                conn.send(str(msg25).encode())
 
             if codigo == 31:
                 print("Servidor: Recibí respuesta negativa de captura de pokemon del cliente",addr[0],':',addr[1])
