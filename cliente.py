@@ -4,6 +4,7 @@ import socket
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 print("Crear socket de cliente")
 
+print("Ingresar ip del servidor")
 # Conecta el socket a la dirección localhost y el puerto 8080
 print("Conectando al servidor")
 sock.connect(("localhost", 9999))
@@ -22,7 +23,10 @@ print("Cliente, ¿Desea capturar un pokemon?")
 respuesta = int(input())
 if respuesta == 1:
     print("Cliente: Enviando mensaje al servidor con codigo 10")
-    sock.send(str(msg10).encode())
+    codigo_byte = bytes([10])
+    msg_byte = bytes(msg10['msg'].encode())
+    sock.send(codigo_byte + msg_byte)
+    #sock.send(str(msg10).encode())
 elif respuesta == 2:
     print("Cliente: Enviando mensaje al servidor con codigo 32")
     sock.send(str(msg32).encode())
@@ -53,7 +57,7 @@ while True:
         elif respuesta == 2:
             print("Cliente: Enviando mensaje al servidor con codigo 31: No")
             sock.send(str(msg31).encode())
-        
+
 
     if codigo == 21:
         print("Cliente: Recibí codigo 21")
@@ -86,8 +90,7 @@ while True:
             print("Cliente: Enviando mensaje al servidor con codigo 24. Solicitar al servidor la lista de pokemones capturados")
 
     if codigo == 23:
-        print("Cliente: Recibí codigo 23")
-        print("Intentos de captura agotados")
+        print("Cliente: Recibí codigo 23. Intentos de captura agotados")
         print("Cliente: Enviando mensaje al servidor con codigo 32: Terminando sesión")
         sock.send(str(msg32).encode())
 

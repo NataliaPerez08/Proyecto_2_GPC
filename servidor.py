@@ -6,13 +6,10 @@ import conexionPokeAPi  as pokeapi
 from _thread import start_new_thread
 def threaded(conn, addr):
   
-    msg21 = {"codigo":21,"msg":"¿Intentar captura de nuevo?","intentos":10}
-    msg22 = {"codigo":22,"msg":"Envia pokemon capturado","pokemon":'x-pokemon'}
-    msg23 = {"codigo":23,"msg":"Intentos de captura agotados"}
-    msg32 = {"codigo":32,"msg":"Terminando sesión"}
-
     pokemon_actual = ""
     lista_pokemones = []
+    intentos = 5 # Valor inicial
+    msg21 = {"codigo":21,"msg":"¿Intentar captura de nuevo?","intentos":intentos}
     while True:
         # Recibe un mensaje del cliente
         data = conn.recv(1024)
@@ -33,7 +30,7 @@ def threaded(conn, addr):
 
             if codigo == 30:
                 print("Servidor: Recibí respuesta afirmativa de captura de pokemon del cliente",addr[0],':',addr[1])
-                capturado = random.randint(0,5)
+                capturado = random.randint(0,10)
 
                 if capturado == 1:
                     print("Servidor: Pokemon capturado del cliente",addr[0],':',addr[1])
@@ -43,12 +40,14 @@ def threaded(conn, addr):
                 else:
                     print("Servidor: Pokemon no capturado del cliente",addr[0],':',addr[1])
                     intentos = msg21['intentos'] - 1
-                    msg21 = {"codigo":21,"msg":"¿Intentar captura de nuevo?","intentos":intentos}
-                    conn.send(str(msg21).encode())
-                    intentos = intentos - 1
                     if intentos == 0:
                         print("Servidor: Intentos de captura agotados")
+                        msg23 = {"codigo":23,"msg":"Intentos de captura agotados"}
                         conn.send(str(msg23).encode())
+                    else:
+                        msg21 = {"codigo":21,"msg":"¿Intentar captura de nuevo?","intentos":intentos}
+                        conn.send(str(msg21).encode())
+                        intentos = intentos - 1
             if codigo == 24:
                 print("Servidor: Recibí solicitud de pokemones capturados del cliente",addr[0],':',addr[1])
                 msg25 = {"codigo":25,"msg":"Pokemones capturados","pokemones":lista_pokemones}
@@ -57,10 +56,12 @@ def threaded(conn, addr):
             if codigo == 31:
                 print("Servidor: Recibí respuesta negativa de captura de pokemon del cliente",addr[0],':',addr[1])
                 print("Servidor: Enviando mensaje de terminar sesión al cliente",addr[0],':',addr[1])
+                msg32 = {"codigo":32,"msg":"Terminando sesión"}
                 conn.send(str(msg32).encode())
 
             if codigo == 32:
                 print("Servidor: Recibí solicitud de terminar sesión del cliente",addr[0],':',addr[1])
+                msg32 = {"codigo":32,"msg":"Terminando sesión"}
                 conn.send(str(msg32).encode())
                 break
         else:

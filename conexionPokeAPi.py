@@ -1,42 +1,29 @@
 import requests
 import random
 
-def obtener_pokemon():
-    response = requests.get("https://pokeapi.co/api/v2/pokemon?limit=1000&offset=0")
-    r_json = response.json()
-    n = random.randint(0, 1000)
-    return r_json['results'][n]
-
 def obtener_imagen_pokemon(pokemon):
-    url_pokemon = pokemon['url']
+    id = pokemon['id']
+    url_pokemon= "https://pokeapi.co/api/v2/pokemon/"+str(id)
     response = requests.get(url_pokemon)
     r_json = response.json()
     return r_json['sprites']['front_default']
 
-def imprimir_pokemon():
-    response = requests.get("https://pokeapi.co/api/v2/pokemon?limit=1000&offset=0")
-    r_json = response.json()
-    n = random.randint(0, 1000)    
-    print(r_json['results'][n]['name'])
-    url_pokemon = r_json['results'][n]['url']
-    print(url_pokemon)
-
-    response = requests.get(url_pokemon)
-    r_json = response.json()
-    print(r_json['name'])
-    print(r_json['id'])
-    print(r_json['sprites']['front_default'])
-
 def ejemplos():
     print("Pokemon aleatorio")
-    #imprimir_pokemon()
-    pokemon=obtener_pokemon()
+    pokemon=obtener_pokemon_por_id()
+    id = pokemon['id']
+    print(pokemon['id'])
     print(pokemon['name'])
     imagen_url=obtener_imagen_pokemon(pokemon)
     response = requests.get(imagen_url)
     with open('pr.png', 'wb') as handler:
         handler.write(response.content)
-   
 
+def obtener_pokemon_por_id():
+    id = random.randint(1, 1000)
+    #GET https://pokeapi.co/api/v2/pokemon/{id or name}/
+    response = requests.get("https://pokeapi.co/api/v2/pokemon/"+str(id))
+    r_json = response.json()
+    return r_json
 
 ejemplos()
