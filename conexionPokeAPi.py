@@ -10,7 +10,7 @@ def obtener_imagen_pokemon(pokemon):
 
 def ejemplos():
     print("Pokemon aleatorio")
-    pokemon=obtener_pokemon_por_id()
+    pokemon=obtener_pokemon()
     id = pokemon['id']
     print(pokemon['id'])
     print(pokemon['name'])
@@ -19,11 +19,9 @@ def ejemplos():
     with open('pr.png', 'wb') as handler:
         handler.write(response.content)
 
-def obtener_pokemon_por_id():
-    id = random.randint(1, 1000)
+def obtener_pokemon():
+    id = random.randint(1, 255)
     #GET https://pokeapi.co/api/v2/pokemon/{id or name}/
     response = requests.get("https://pokeapi.co/api/v2/pokemon/"+str(id))
     r_json = response.json()
     return r_json
-
-ejemplos()

@@ -1,68 +1,85 @@
 import socket
 import random
 import conexionPokeAPi  as pokeapi
-# Partially-mapped crossover (PMX)
-# Order crossover (OX)
 from _thread import start_new_thread
 def threaded(conn, addr):
   
     pokemon_actual = ""
     lista_pokemones = []
     intentos = 5 # Valor inicial
-    msg21 = {"codigo":21,"msg":"¿Intentar captura de nuevo?","intentos":intentos}
     while True:
         # Recibe un mensaje del cliente
         data = conn.recv(1024)
         if data: 
             try:
-                msg_cliente = eval(data.decode())
-                codigo = msg_cliente['codigo']
+                codigo = int.from_bytes(data, byteorder='big')
             except SyntaxError:
                 print("Servidor: Recibí mensaje inválido del cliente",addr[0],':',addr[1])
-                print(data.decode())
 
             if codigo == 10:
                 print("Servidor: Recibí solicitud de pokemon")
-                pokemon_actual = pokeapi.obtener_pokemon()['name']
-                msg20 = {"codigo":20,"msg":"¿Capturar pokemon?","pokemon":pokemon_actual}
+                pokemon_actual = pokeapi.obtener_pokemon()
+                id_pokemon = pokemon_actual['id']
+                print("Elección de pokemon: ",id_pokemon,".-",pokemon_actual['name'], )
+
                 print("Servidor: Enviando pokemon al cliente",addr[0],':',addr[1])
-                conn.send(str(msg20).encode())
+                # {"codigo":20,"msg":"¿Capturar pokemon?","pokemon":pokemon_actual} 
+                codigo_byte = int.to_bytes(20, length=1, byteorder='big')
+                msg20_byte = int.to_bytes(id_pokemon, length=1, byteorder='big')
+                # concatena los bytes [code,idPokemon]
+                msg_byte = codigo_byte + msg20_byte
+                conn.send(msg_byte)
 
             if codigo == 30:
                 print("Servidor: Recibí respuesta afirmativa de captura de pokemon del cliente",addr[0],':',addr[1])
                 capturado = random.randint(0,10)
 
                 if capturado == 1:
-                    print("Servidor: Pokemon capturado del cliente",addr[0],':',addr[1])
-                    msg22 = {"codigo":22,"msg":"Pokemon capturado","pokemon":pokemon_actual}
-                    lista_pokemones.append(pokemon_actual)
-                    conn.send(str(msg22).encode())
+                    print("Servidor: Pokemon capturado del cliente",addr[0],':',addr[1], ". Enviando...")
+                    lista_pokemones.append(pokemon_actual['id'])
+                    #{"codigo":22,"msg":"Pokemon capturado","pokemon":pokemon_actual}
+                    # [code,idPokemon,imageSize,image]
+                    codigo_byte = int.to_bytes(22, length=1, byteorder='big')
+                    id_pokemon_byte = int.to_bytes(pokemon_actual['id'], length=1, byteorder='big')
+                    imagen_pokemon = pokeapi.obtener_imagen_pokemon(pokemon_actual)
+                    imagen_pokemon_byte = imagen_pokemon.encode()
+                    image_size_byte = int.to_bytes(len(imagen_pokemon_byte), length=1, byteorder='big')
+                    msg_byte = codigo_byte + id_pokemon_byte + image_size_byte + imagen_pokemon_byte
+                    conn.send(msg_byte)
                 else:
                     print("Servidor: Pokemon no capturado del cliente",addr[0],':',addr[1])
-                    intentos = msg21['intentos'] - 1
+                    intentos = intentos - 1
                     if intentos == 0:
                         print("Servidor: Intentos de captura agotados")
-                        msg23 = {"codigo":23,"msg":"Intentos de captura agotados"}
-                        conn.send(str(msg23).encode())
+                        #{"codigo":23,"msg":"Intentos de captura agotados"}
+                        codigo_byte = int.to_bytes(23, length=1, byteorder='big')
+                        conn.send(codigo_byte)
                     else:
-                        msg21 = {"codigo":21,"msg":"¿Intentar captura de nuevo?","intentos":intentos}
-                        conn.send(str(msg21).encode())
-                        intentos = intentos - 1
+                        #{"codigo":21,"msg":"¿Intentar captura de nuevo?","intentos":intentos}
+                        codigo_byte = int.to_bytes(21, length=1, byteorder='big')
+                        id_pokemon_byte = int.to_bytes(pokemon_actual['id'], length=1, byteorder='big')
+                        intentos_byte = int.to_bytes(intentos, length=1, byteorder='big')
+                        msg_byte = codigo_byte + id_pokemon_byte + intentos_byte
+                        conn.send(msg_byte)
             if codigo == 24:
                 print("Servidor: Recibí solicitud de pokemones capturados del cliente",addr[0],':',addr[1])
-                msg25 = {"codigo":25,"msg":"Pokemones capturados","pokemones":lista_pokemones}
-                conn.send(str(msg25).encode())
+                #msg25 = {"codigo":25,"msg":"Pokemones capturados","pokemones":lista_pokemones}
+                codigo_byte = int.to_bytes(25, length=1, byteorder='big')
+                lista_pokemones_byte = str(lista_pokemones).encode()
+                msg_byte = codigo_byte + lista_pokemones_byte
+                conn.send(msg_byte)
 
             if codigo == 31:
                 print("Servidor: Recibí respuesta negativa de captura de pokemon del cliente",addr[0],':',addr[1])
                 print("Servidor: Enviando mensaje de terminar sesión al cliente",addr[0],':',addr[1])
-                msg32 = {"codigo":32,"msg":"Terminando sesión"}
-                conn.send(str(msg32).encode())
+                #{"codigo":32,"msg":"Terminando sesión"}
+                codigo_byte = int.to_bytes(32, length=1, byteorder='big')
+                conn.send(codigo_byte)
 
             if codigo == 32:
                 print("Servidor: Recibí solicitud de terminar sesión del cliente",addr[0],':',addr[1])
-                msg32 = {"codigo":32,"msg":"Terminando sesión"}
-                conn.send(str(msg32).encode())
+                codigo_byte = int.to_bytes(32, length=1, byteorder='big')
+                conn.send(codigo_byte)
                 break
         else:
             break
