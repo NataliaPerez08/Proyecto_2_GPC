@@ -6,7 +6,9 @@ def obtener_imagen_pokemon(pokemon):
     url_pokemon= "https://pokeapi.co/api/v2/pokemon/"+str(id)
     response = requests.get(url_pokemon)
     r_json = response.json()
-    return r_json['sprites']['front_default']
+    image_url = r_json['sprites']['front_default']
+    response = requests.get(image_url)
+    return response
 
 def ejemplos():
     print("Pokemon aleatorio")

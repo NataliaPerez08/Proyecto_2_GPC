@@ -1,13 +1,21 @@
 import socket
-
+import sys
 # Crea un socket TCP
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 print("Crear socket de cliente")
 
-print("Ingresar ip del servidor")
-# Conecta el socket a la dirección localhost y el puerto 8080
+# El cliente recibirá como parámetros desde la línea de comandos la dirección IP del servidor y el puerto al cual se conectará.
+if len(sys.argv) == 3:
+    host = sys.argv[1]
+    puerto = int(sys.argv[2])
+    sock.connect((host, puerto))
+else:
+    print("Error: Debe ingresar la dirección IP del servidor y el puerto al cual se conectará")
+    exit()
+# Conecta el socket a la dirección localhost y el puerto 9999
+#sock.connect(("localhost", 9999))
+
 print("Conectando al servidor")
-sock.connect(("localhost", 9999))
 
 # Envia un mensaje al servidor
 print("Cliente, ¿Desea capturar un pokemon?")
@@ -95,8 +103,12 @@ while True:
 
     if codigo == 25:
         print("Cliente: Recibí codigo 25")
-        lista_pokemones = str(data[1])
-        print("Pokemones capturados", lista_pokemones)
+        longitud = len(data)
+        lista_pokemones = data[1:longitud]
+        # Decodifica la lista de pokemones
+        lista_pokemones = lista_pokemones.decode()
+        print(lista_pokemones)
+        #print("Pokemones capturados", lista_pokemones)
         print("Cliente, ¿Desea capturar otro pokemon? 1. Sí  2. No")
         respuesta = int(input())
         if respuesta == 1:

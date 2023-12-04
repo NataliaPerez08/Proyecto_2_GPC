@@ -32,7 +32,7 @@ def threaded(conn, addr):
 
             if codigo == 30:
                 print("Servidor: Recibí respuesta afirmativa de captura de pokemon del cliente",addr[0],':',addr[1])
-                capturado = random.randint(0,10)
+                capturado = random.randint(0,2)
 
                 if capturado == 1:
                     print("Servidor: Pokemon capturado del cliente",addr[0],':',addr[1], ". Enviando...")
@@ -42,8 +42,9 @@ def threaded(conn, addr):
                     codigo_byte = int.to_bytes(22, length=1, byteorder='big')
                     id_pokemon_byte = int.to_bytes(pokemon_actual['id'], length=1, byteorder='big')
                     imagen_pokemon = pokeapi.obtener_imagen_pokemon(pokemon_actual)
-                    imagen_pokemon_byte = imagen_pokemon.encode()
-                    image_size_byte = int.to_bytes(len(imagen_pokemon_byte), length=1, byteorder='big')
+                    imagen_pokemon_byte = imagen_pokemon.content
+                    print("Tamaño de imagen: ",len(imagen_pokemon_byte))
+                    image_size_byte = int.to_bytes(len(imagen_pokemon_byte), length=4, byteorder='big')
                     msg_byte = codigo_byte + id_pokemon_byte + image_size_byte + imagen_pokemon_byte
                     conn.send(msg_byte)
                 else:
@@ -65,8 +66,12 @@ def threaded(conn, addr):
                 print("Servidor: Recibí solicitud de pokemones capturados del cliente",addr[0],':',addr[1])
                 #msg25 = {"codigo":25,"msg":"Pokemones capturados","pokemones":lista_pokemones}
                 codigo_byte = int.to_bytes(25, length=1, byteorder='big')
-                lista_pokemones_byte = str(lista_pokemones).encode()
-                msg_byte = codigo_byte + lista_pokemones_byte
+                s_lista_pokemones = str(lista_pokemones)
+                # convierte la lista de pokemones a bytes
+                bytes_lista_pokemones = s_lista_pokemones.encode()
+                print(s_lista_pokemones)
+                print(bytes_lista_pokemones)
+                msg_byte = codigo_byte + bytes_lista_pokemones
                 conn.send(msg_byte)
 
             if codigo == 31:
