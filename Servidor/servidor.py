@@ -1,6 +1,6 @@
 import socket
 import random
-import conexionPokeAPi  as pokeapi
+import conexionPokeAPI  as pokeapi
 from _thread import start_new_thread
 def threaded(conn, addr):
   

@@ -1,0 +1,17 @@
+# Use Alphine Linux as the base image
+FROM python:3.11.5-alpine
+
+# Define a build argument with a default value of 9999
+ARG PORT=9999
+
+# Add a python file to the image
+ADD servidor.py /opt/
+ADD conexionPokeAPI.py /opt/
+
+# Install the required packages
+RUN pip install requests
+
+# Expose the specified port
+EXPOSE $PORT
+
+CMD ["python", "/opt/servidor.py"]
