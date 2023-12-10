@@ -7,6 +7,7 @@ def threaded(conn, addr):
     pokemon_actual = ""
     lista_pokemones = []
     intentos = 5 # Valor inicial de intento
+    nombre_cliente = ""
     
     # Establer un timeout de 60 segundos
     conn.settimeout(10)
@@ -20,8 +21,24 @@ def threaded(conn, addr):
                     codigo = data[0]                
                 except SyntaxError:
                     print("Servidor: Recibí mensaje inválido del cliente",addr[0],':',addr[1])
-                    codigo_byte = int.to_bytes(41, length=1, byteorder='big')
+                    codigo_byte = int.to_bytes(42, length=1, byteorder='big')
 
+                # Recibe el nombre del cliente
+                if codigo == 0:
+                    nombre_cliente = data[1:]
+                    print("Servidor: Recibí nombre del cliente",nombre_cliente.decode())
+                    print("Servidor: Validando nombre del cliente",nombre_cliente.decode())
+                    random_number = random.randint(0,3)
+                    if random_number == 0:
+                        print("Cliente: Nombre de cliente válido. Mantener conexión")
+                    else:
+                        print("Cliente: Nombre de cliente inválido. Cerrando conexión")
+                        #{"codigo":43, msg:"Nombre de cliente inválido"}
+                        codigo_byte = int.to_bytes(43, length=1, byteorder='big')
+                        conn.send(codigo_byte)
+                        break
+                    
+                # Recibe la solicitud de un pokemon
                 if codigo == 10:
                     print("Servidor: Recibí solicitud de pokemon")
                     pokemon_actual = pokeapi.obtener_pokemon()
@@ -31,7 +48,7 @@ def threaded(conn, addr):
                     if pokemon_actual == "":
                         print("Servidor: Ocurrió un error. Enviando mensaje al cliente",addr[0],':',addr[1])
                         #{"codigo":41,"msg":"Ocurrió un error en la conexión con la API"}
-                        codigo_byte = int.to_bytes(43, length=1, byteorder='big')
+                        codigo_byte = int.to_bytes(41, length=1, byteorder='big')
                     else:
                         print("Servidor: Enviando pokemon al cliente",addr[0],':',addr[1])
                         # {"codigo":20,"msg":"¿Capturar pokemon?","pokemon":pokemon_actual} 
@@ -124,7 +141,6 @@ def Main():
         conn, addr = sock.accept()
         print("Conexión establecida con", addr[0],':',addr[1])
         start_new_thread(threaded, (conn,addr))
-        #sock.close()
 
 if __name__ == '__main__':
 	Main()

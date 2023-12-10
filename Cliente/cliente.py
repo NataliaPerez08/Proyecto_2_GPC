@@ -16,6 +16,11 @@ else:
 #sock.connect(("localhost", 9999))
 
 print("Conectando al servidor...")
+print("Cliente, ¿Cual es su nombre?")
+cliente_nombre = input()
+# Enviarle el nombre del cliente al servidor
+print("Cliente: Enviando mensaje al servidor con codigo 0: Nombre del cliente")
+sock.send(int.to_bytes(0, length=1, byteorder='big'))
 
 # Envia un mensaje al servidor
 print("Cliente, ¿Desea capturar un pokemon?")
@@ -145,6 +150,14 @@ try:
         if codigo == 40:
             print("Cliente: Recibí codigo 40. Timeout: El servidor terminó la conexión.")
             break
+
+        if codigo == 42:
+            print("Cliente: Recibí codigo 42. Respuesta inválida del cliente.")
+            break
+        if codigo == 43:
+            print("Cliente: Recibí codigo 43. Error: El usuario no existe. Terminando sesión.")
+            break
+
 except socket.timeout:
     print("Cliente: Timeout. Cerrando conexión con el servidor")
     sock.send(int.to_bytes(40, length=1, byteorder='big'))
