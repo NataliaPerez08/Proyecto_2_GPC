@@ -79,9 +79,22 @@ try:
         if codigo == 22:
             print("Cliente: Recibí codigo 22")
             id_pokemon = data[1]
-            image_size = data[2]
-            image = data[3]
+            image_size = data[2:6]
+            image = data[6:]
             print("Cliente: Recibí la imagen del pokemon con id= ",id_pokemon)
+            int_image_size = int.from_bytes(image_size, byteorder='big')
+            print("Tamaño de imagen: ",int_image_size)
+            print("¿Desea guardar la imagen? 1. Sí 2. No")
+            respuesta = int(input())
+            if respuesta == 1:
+                nombre_archivo = "pokemon"+str(id_pokemon)+".png"
+                archivo = open(nombre_archivo, "wb")
+                archivo.write(image)
+                archivo.close()
+                print("Cliente: Imagen guardada")
+            elif respuesta == 2:
+                print("Cliente: Imagen no guardada")
+        
             print("Cliente, ¿Desea capturar otro pokemon? 1. Sí 2. No 3. Consultar pokemones capturados")
             respuesta = int(input())
             if respuesta == 1:
