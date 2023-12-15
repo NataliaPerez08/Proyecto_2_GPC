@@ -18,7 +18,7 @@ else:
 print("Conectando al servidor...")
 
 # Envia un mensaje al servidor
-print("Cliente, ¿Desea capturar un pokemon?")
+print("Cliente, ¿Desea capturar un pokemon? 1. Sí 2. No")
 respuesta = int(input())
 if respuesta == 1:
     print("Cliente: Enviando mensaje al servidor con codigo 10.")
@@ -83,20 +83,23 @@ try:
 
         if codigo == 22: # Si el codigo es 22, el servidor envió un pokemon y se capturó
             print("Cliente: Recibí codigo 22")
-            id_pokemon = data[1] 
-            image_size = data[2] # Obtiene el tamaño de la imagen
-            image = int.to_bytes(data[3],length=image_size) # Obtiene la imagen
+            id_pokemon = data[1]
+            image_size = data[2:6]
+            image = data[6:]
             print("Cliente: Recibí la imagen del pokemon con id= ",id_pokemon)
-            print("Tamaño de imagen: ",image_size)
-            # Guarda la imagen en un archivo
-            print("Desea guardar la imagen del pokemon? 1. Sí 2. No")
+            int_image_size = int.from_bytes(image_size, byteorder='big')
+            print("Tamaño de imagen: ",int_image_size)
+            print("¿Desea guardar la imagen? 1. Sí 2. No")
             respuesta = int(input())
             if respuesta == 1:
-                archivo = open("pokemon_"+str(id_pokemon)+".png", "wb")
+                nombre_archivo = "pokemon"+str(id_pokemon)+".png"
+                archivo = open(nombre_archivo, "wb")
                 archivo.write(image)
                 archivo.close()
-                print("Cliente: Imagen guardada en pokemon_"+str(id_pokemon)+".png")
-
+                print("Cliente: Imagen guardada")
+            elif respuesta == 2:
+                print("Cliente: Imagen no guardada")
+        
             print("Cliente, ¿Desea capturar otro pokemon? 1. Sí 2. No 3. Consultar pokemones capturados")
             respuesta = int(input())
             if respuesta == 1:

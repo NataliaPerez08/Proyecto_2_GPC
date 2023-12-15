@@ -2,8 +2,9 @@ import socket
 import random
 import conexionPokeAPI  as pokeapi
 from _thread import start_new_thread
+
+# Función que atiende una conexión. Recibe como parámetro el socket de la conexión y la dirección del cliente
 def threaded(conn, addr):
-  
     pokemon_actual = ""
     lista_pokemones = []
     intentos = 5 # Valor inicial de intento
@@ -108,6 +109,7 @@ def threaded(conn, addr):
     except ConnectionAbortedError:
         print("Servidor: Error de conexión con el cliente",addr[0],':',addr[1])
 
+# Función principal. Crea un socket TCP y escucha conexiones
 def Main():
     host = ""
     port = 9999
@@ -123,6 +125,7 @@ def Main():
         # Acepta una conexión
         conn, addr = sock.accept()
         print("Conexión establecida con", addr[0],':',addr[1])
+        # Inicia un nuevo hilo para atender la conexión
         start_new_thread(threaded, (conn,addr))
         #sock.close()
 
