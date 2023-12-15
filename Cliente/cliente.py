@@ -35,34 +35,39 @@ else:
     codigo_byte = int.to_bytes(42, length=1, byteorder='big')
     sock.send(codigo_byte)
 
+# Espera una respuesta del servidor por 10 segundos
 sock.settimeout(10)
 try:
     while True:
         # Recibe una respuesta del servidor
         data = sock.recv(1024)
-        if not data:
+        if not data: # Si no recibe datos, termina el ciclo
             break
 
-        codigo = data[0]
-        if codigo == 20:
+        codigo = data[0] # Obtiene el codigo del mensaje
+
+        if codigo == 20: # Si el codigo es 20, el servidor envió un pokemon
             print("Cliente: Recibí codigo 20")
-            id_pokemon = str(data[1])
+            id_pokemon = str(data[1]) # Obtiene el id del pokemon
 
             print("Cliente, ¿Desea capturar el pokemon "+id_pokemon+"?: 1. Sí 2. No")
             respuesta = int(input())
             if respuesta == 1:
+                # El cliente quiere capturar el pokemon. Envia un mensaje al servidor con codigo 30
                 print("Cliente: Enviando mensaje al servidor con codigo 30: Sí")
                 codigo_byte = int.to_bytes(30, length=1, byteorder='big')
                 sock.send(codigo_byte)
+
             elif respuesta == 2:
+                # El cliente no quiere capturar el pokemon. Envia un mensaje al servidor con codigo 31
                 print("Cliente: Enviando mensaje al servidor con codigo 31: No")
                 codigo_byte = int.to_bytes(31, length=1, byteorder='big')
                 sock.send(codigo_byte)
 
 
-        if codigo == 21:
+        if codigo == 21: # Si el codigo es 21, el servidor envió un pokemon, pero no se capturó
             print("Cliente: Recibí codigo 21")
-            intentos = data[2]
+            intentos = data[2] # Obtiene el numero de intentos restantes
             print("Cliente: Recibí ",intentos," intentos")
 
             print("Cliente, ¿Desea reintentar capturar el pokemon ",data[1],": 1. Sí 2. No")
@@ -76,12 +81,22 @@ try:
                 codigo_byte = int.to_bytes(31, length=1, byteorder='big')
                 sock.send(codigo_byte)
 
-        if codigo == 22:
+        if codigo == 22: # Si el codigo es 22, el servidor envió un pokemon y se capturó
             print("Cliente: Recibí codigo 22")
-            id_pokemon = data[1]
-            image_size = data[2]
-            image = data[3]
+            id_pokemon = data[1] 
+            image_size = data[2] # Obtiene el tamaño de la imagen
+            image = int.to_bytes(data[3],length=image_size) # Obtiene la imagen
             print("Cliente: Recibí la imagen del pokemon con id= ",id_pokemon)
+            print("Tamaño de imagen: ",image_size)
+            # Guarda la imagen en un archivo
+            print("Desea guardar la imagen del pokemon? 1. Sí 2. No")
+            respuesta = int(input())
+            if respuesta == 1:
+                archivo = open("pokemon_"+str(id_pokemon)+".png", "wb")
+                archivo.write(image)
+                archivo.close()
+                print("Cliente: Imagen guardada en pokemon_"+str(id_pokemon)+".png")
+
             print("Cliente, ¿Desea capturar otro pokemon? 1. Sí 2. No 3. Consultar pokemones capturados")
             respuesta = int(input())
             if respuesta == 1:
@@ -136,6 +151,8 @@ except socket.timeout:
     print("Cliente: Timeout. Cerrando conexión con el servidor")
     sock.send(int.to_bytes(40, length=1, byteorder='big'))
     sock.close()
+except ConnectionAbortedError:
+    print("Cliente: Error de conexión con el servidor")
 
 # Cierra el socket
 sock.close()

@@ -8,7 +8,7 @@ def threaded(conn, addr):
     lista_pokemones = []
     intentos = 5 # Valor inicial de intento
     
-    # Establer un timeout de 60 segundos
+    # Espera 10 segundos por una respuesta del cliente
     conn.settimeout(10)
     try: 
         while True:

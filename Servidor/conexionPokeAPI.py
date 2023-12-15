@@ -1,6 +1,8 @@
 import requests
 import random
 
+# Obtiene la imagen de un pokemon de la API. Retorna un objeto response de requests 
+# (imagen en bytes)
 def obtener_imagen_pokemon(pokemon):
     id = pokemon['id']
     url_pokemon= "https://pokeapi.co/api/v2/pokemon/"+str(id)
@@ -10,17 +12,8 @@ def obtener_imagen_pokemon(pokemon):
     response = requests.get(image_url)
     return response
 
-def ejemplos():
-    print("Pokemon aleatorio")
-    pokemon=obtener_pokemon()
-    id = pokemon['id']
-    print(pokemon['id'])
-    print(pokemon['name'])
-    imagen_url=obtener_imagen_pokemon(pokemon)
-    response = requests.get(imagen_url)
-    with open('pr.png', 'wb') as handler:
-        handler.write(response.content)
-
+# Genera un numero aleatorio entre 1 y 255, para obtener un pokemon aleatorio
+# de la API. Retorna un diccionario con los datos del pokemon.
 def obtener_pokemon():
     id = random.randint(1, 255)
     #GET https://pokeapi.co/api/v2/pokemon/{id or name}/
