@@ -22,25 +22,29 @@ def threaded(conn, addr):
                 except SyntaxError:
                     print("Servidor: Recibí mensaje inválido del cliente",addr[0],':',addr[1])
                     codigo_byte = int.to_bytes(41, length=1, byteorder='big')
+                    conn.send(codigo_byte)
 
                 if codigo == 10:
                     print("Servidor: Recibí solicitud de pokemon")
                     pokemon_actual = pokeapi.obtener_pokemon()
-                    id_pokemon = pokemon_actual['id']
+                    try:
+                        id_pokemon = pokemon_actual['id']
+                    except TypeError:
+                        print("Servidor: Ocurrió un error. Enviando mensaje al cliente",addr[0],':',addr[1])
+                        #{"codigo":43,"msg":"Ocurrió un error en la conexión con la API"}
+                        codigo_byte = int.to_bytes(43, length=1, byteorder='big')
+                        conn.send(codigo_byte)
+                        break
+
                     print("Elección de pokemon: ",id_pokemon,".-",pokemon_actual['name'], )
 
-                    if pokemon_actual == "":
-                        print("Servidor: Ocurrió un error. Enviando mensaje al cliente",addr[0],':',addr[1])
-                        #{"codigo":41,"msg":"Ocurrió un error en la conexión con la API"}
-                        codigo_byte = int.to_bytes(43, length=1, byteorder='big')
-                    else:
-                        print("Servidor: Enviando pokemon al cliente",addr[0],':',addr[1])
-                        # {"codigo":20,"msg":"¿Capturar pokemon?","pokemon":pokemon_actual} 
-                        codigo_byte = int.to_bytes(20, length=1, byteorder='big')
-                        msg20_byte = int.to_bytes(id_pokemon, length=1, byteorder='big')
-                        # concatena los bytes [code,idPokemon]
-                        msg_byte = codigo_byte + msg20_byte
-                        conn.send(msg_byte)
+                    print("Servidor: Enviando pokemon al cliente",addr[0],':',addr[1])
+                    # {"codigo":20,"msg":"¿Capturar pokemon?","pokemon":pokemon_actual} 
+                    codigo_byte = int.to_bytes(20, length=1, byteorder='big')
+                    msg20_byte = int.to_bytes(id_pokemon, length=1, byteorder='big')
+                    # concatena los bytes [code,idPokemon]
+                    msg_byte = codigo_byte + msg20_byte
+                    conn.send(msg_byte)
 
                 if codigo == 30:
                     print("Servidor: Recibí respuesta afirmativa de captura de pokemon del cliente",addr[0],':',addr[1])
@@ -54,6 +58,10 @@ def threaded(conn, addr):
                         codigo_byte = int.to_bytes(22, length=1, byteorder='big')
                         id_pokemon_byte = int.to_bytes(pokemon_actual['id'], length=1, byteorder='big')
                         imagen_pokemon = pokeapi.obtener_imagen_pokemon(pokemon_actual)
+                        if imagen_pokemon == "":
+                            print("Servidor: Ocurrió un error. Enviando mensaje al cliente",addr[0],':',addr[1])
+                            conn.send(int.to_bytes(43, length=1, byteorder='big'))
+                            break
                         imagen_pokemon_byte = imagen_pokemon.content
                         print("Tamaño de imagen: ",len(imagen_pokemon_byte))
                         image_size_byte = int.to_bytes(len(imagen_pokemon_byte), length=4, byteorder='big')
@@ -100,9 +108,13 @@ def threaded(conn, addr):
                 if codigo == 40:
                     print("Servidor: Recibí codigo 40. El cliente",addr[0],':',addr[1], "terminó la conexión")
                     break
+                if codigo == 41:
+                    print("Servidor: Recibí codigo 41. Ocurrió un error en el cliente. (Envio un mensaje invalido). Cerrando sesion",addr[0],':',addr[1])
+                    conn.send(int.to_bytes(32, length=1, byteorder='big'))
+                    break
                 if codigo == 42:
                     conn.send(int.to_bytes(32, length=1, byteorder='big'))
-                    print("Servidor: Recibí codigo 42. El cliente",addr[0],':',addr[1], " envió un mensaje inválido")
+                    print("Servidor: Recibí codigo 42. El cliente",addr[0],':',addr[1], " avisó que no hay pokemones capturados. Terminando conexión")
                     break
             else:
                 break

@@ -30,9 +30,9 @@ elif respuesta == 2:
     codigo_byte = int.to_bytes(32, length=1, byteorder='big')
     sock.send(codigo_byte)
 else:
-    print("Cliente: Respuesta inválida enviando mensaje al servidor con codigo 42")
-    #"codigo":42,"msg":"Respuesta inválida"
-    codigo_byte = int.to_bytes(42, length=1, byteorder='big')
+    print("Cliente: Respuesta inválida enviando mensaje al servidor con codigo 41")
+    #"codigo":41,"msg":"Respuesta inválida"
+    codigo_byte = int.to_bytes(41, length=1, byteorder='big')
     sock.send(codigo_byte)
 
 # Espera una respuesta del servidor por 10 segundos
@@ -63,7 +63,11 @@ try:
                 print("Cliente: Enviando mensaje al servidor con codigo 31: No")
                 codigo_byte = int.to_bytes(31, length=1, byteorder='big')
                 sock.send(codigo_byte)
-
+            else:
+                print("Cliente: Respuesta inválida enviando mensaje al servidor con codigo 41")
+                #"codigo":41,"msg":"Respuesta inválida"
+                codigo_byte = int.to_bytes(41, length=1, byteorder='big')
+                sock.send(codigo_byte)
 
         if codigo == 21: # Si el codigo es 21, el servidor envió un pokemon, pero no se capturó
             print("Cliente: Recibí codigo 21")
@@ -79,6 +83,11 @@ try:
             elif respuesta == 2:
                 print("Cliente: Enviando mensaje al servidor con codigo 31: No")
                 codigo_byte = int.to_bytes(31, length=1, byteorder='big')
+                sock.send(codigo_byte)
+            else:
+                print("Cliente: Respuesta inválida enviando mensaje al servidor con codigo 41")
+                #"codigo":41,"msg":"Respuesta inválida"
+                codigo_byte = int.to_bytes(41, length=1, byteorder='big')
                 sock.send(codigo_byte)
 
         if codigo == 22: # Si el codigo es 22, el servidor envió un pokemon y se capturó
@@ -99,7 +108,12 @@ try:
                 print("Cliente: Imagen guardada")
             elif respuesta == 2:
                 print("Cliente: Imagen no guardada")
-        
+            else:
+                print("Cliente: Respuesta inválida enviando mensaje al servidor con codigo 41")
+                #"codigo":41,"msg":"Respuesta inválida"
+                codigo_byte = int.to_bytes(41, length=1, byteorder='big')
+                sock.send(codigo_byte)
+
             print("Cliente, ¿Desea capturar otro pokemon? 1. Sí 2. No 3. Consultar pokemones capturados")
             respuesta = int(input())
             if respuesta == 1:
@@ -110,11 +124,15 @@ try:
                 print("Cliente: Enviando mensaje al servidor con codigo 32: Terminando sesión")
                 codigo_byte = int.to_bytes(32, length=1, byteorder='big')
                 sock.send(codigo_byte)
-
             elif respuesta == 3:
                 print("Cliente: Enviando mensaje al servidor con codigo 24. Solicitar al servidor la lista de pokemones capturados")
                 #{'codigo':24,'msg':'Solicita pokemones capturados'}
                 codigo_byte = int.to_bytes(24, length=1, byteorder='big')
+                sock.send(codigo_byte)
+            else:
+                print("Cliente: Respuesta inválida enviando mensaje al servidor con codigo 41")
+                #"codigo":41,"msg":"Respuesta inválida"
+                codigo_byte = int.to_bytes(41, length=1, byteorder='big')
                 sock.send(codigo_byte)
 
         if codigo == 23:
@@ -129,6 +147,11 @@ try:
             # Decodifica la lista de pokemones
             lista_pokemones = lista_pokemones.decode()
             print(lista_pokemones)
+            if lista_pokemones == "[]":
+                print("Cliente: No hay pokemones capturados")
+                print("Enviando mensaje al servidor con codigo 42: Respuesta incompleta")
+                sock.send(int.to_bytes(42, length=1, byteorder='big'))
+                break
             #print("Pokemones capturados", lista_pokemones)
             print("Cliente, ¿Desea capturar otro pokemon? 1. Sí  2. No")
             respuesta = int(input())
@@ -140,15 +163,28 @@ try:
                 print("Cliente: Enviando mensaje al servidor con codigo 32: Terminando sesión")
                 codigo_byte = int.to_bytes(32, length=1, byteorder='big')
                 sock.send(codigo_byte)
+            else:
+                print("Cliente: Respuesta inválida enviando mensaje al servidor con codigo 41")
+                #"codigo":41,"msg":"Respuesta inválida"
+                codigo_byte = int.to_bytes(41, length=1, byteorder='big')
+                sock.send(codigo_byte)
 
         if codigo == 32:
             print("Cliente: Recibí codigo 32. Terminando sesión")
             break
         if codigo == 41:
-            print("Cliente: Recibí codigo 41. Ocurrió un error en el servidor. Terminando sesión")
+            print("Cliente: Recibí codigo 41. El mensaje no pudo ser interpretado por el servidor. Terminando sesión")
             break
         if codigo == 40:
             print("Cliente: Recibí codigo 40. Timeout: El servidor terminó la conexión.")
+            break
+        if codigo == 42:
+            print("Cliente: Recibí codigo 42. El servidor envió un mensaje inválido. Terminando sesión")
+            print("Cliente: Enviando mensaje al servidor con codigo 32: Terminando sesión")
+            sock.send(int.to_bytes(32, length=1, byteorder='big'))
+            break
+        if codigo == 43:
+            print("Cliente: Recibí codigo 43. Ocurrió un error en el servidor. Terminando sesión")
             break
 except socket.timeout:
     print("Cliente: Timeout. Cerrando conexión con el servidor")
