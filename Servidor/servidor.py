@@ -100,6 +100,10 @@ def threaded(conn, addr):
                 if codigo == 40:
                     print("Servidor: Recibí codigo 40. El cliente",addr[0],':',addr[1], "terminó la conexión")
                     break
+                if codigo == 42:
+                    conn.send(int.to_bytes(32, length=1, byteorder='big'))
+                    print("Servidor: Recibí codigo 42. El cliente",addr[0],':',addr[1], " envió un mensaje inválido")
+                    break
             else:
                 break
     except socket.timeout:
