@@ -1,4 +1,4 @@
-## Total = 13
+## Total = 11
 
 ### Reporte [ 4 pt]
 - Objetivo (*.5* de **.5**) 
